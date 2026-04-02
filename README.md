@@ -37,7 +37,7 @@ Penetration Tester | Security Engineer | DFIR Analyst
 | 05 | [Malware Triage](challenges/05-malware-triage/) | strings, grep, cat | ✅ 5/5 flags |
 | 06 | [Incident Timeline](challenges/06-incident-timeline/) | All of the above | ✅ 2/3 flags |
 
-**Total: 29/31 flags captured**
+**Total: 29/30 flags captured**
 
 ---
 
