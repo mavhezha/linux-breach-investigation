@@ -1,6 +1,6 @@
 # 🔍 Linux Breach Investigation
 
-> A end-to-end Digital Forensics & Incident Response (DFIR) investigation of a compromised Linux web server — reconstructing a full attack chain across six evidence domains.
+> A end-to-end Digital Forensics & Incident Response (DFIR) investigation of a compromised Linux web server: reconstructing a full attack chain across six evidence domains.
 
 ---
 
